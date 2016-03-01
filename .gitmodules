@@ -1,0 +1,6 @@
+[submodule "tufte-css"]
+	path = tufte-css
+	url = https://github.com/edwardtufte/tufte-css.git
+[submodule "cmark"]
+	path = cmark
+	url = https://github.com/jgm/cmark.git
