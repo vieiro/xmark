@@ -8,13 +8,17 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
         <xsl:output indent='no' version='1.0' omit-xml-declaration='yes' encoding='UTF-8' method='xml'  />
         <xsl:strip-space elements='cm:heading cm:paragraph cm:text cm:link cm:emph pre'/>
 
+        <!-- options to generate table of contents and to include syntax highlighting -->
         <xsl:param name="generate.toc" select="'yes'"/>
         <xsl:param name='highlight' select="'yes'" />
 
+        <!-- title and subtitle -->
         <xsl:variable name='title' select='/cm:document/cm:heading[@level = "1"][1]' />
         <xsl:variable name='subtitle' select='/cm:document/cm:heading[@level = "2"][1]' />
 
+        <!-- entry point to common mark document (cm:document) -->
         <xsl:template match="cm:document">
+                <!-- <!DOCTYPE html> -->
                 <xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>
                 <html>
                         <head>
@@ -34,6 +38,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                                 <article>
                                         <h1><xsl:value-of select='$title/cm:text/text()' /></h1>
                                         <p class='subtitle'><xsl:value-of select='$subtitle/cm:text/text()'/></p>
+                                        <!-- Include TOC or not as a margin note -->
                                         <xsl:if test='not($generate.toc = "no")'>
                                                 <p>
                                                         <label for='toc' class='margin-toggle'>⊕ Table of Contents</label>
@@ -63,6 +68,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </body>
                 </html>
         </xsl:template>
+        <!-- heading entry for toc -->
         <xsl:template match="cm:heading" mode="toc">
                 <!-- Ignore title and subtitle headings -->
                 <xsl:if test='. != $title and . != $subtitle'>
@@ -76,6 +82,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         <br />
                 </xsl:if>
         </xsl:template>
+        <!-- heading entry for normal processing -->
         <xsl:template match="cm:heading">
                 <!-- Ignore title and subtitle headings -->
                 <xsl:if test='. != $title and . != $subtitle'>
@@ -87,13 +94,14 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:element>
                 </xsl:if>
         </xsl:template>
+        <!-- paragraphs -->
         <xsl:template match="cm:paragraph">
                 <p><xsl:apply-templates/></p>
         </xsl:template>
-
+        <!-- block quotes and epigraphs -->
         <xsl:template match='cm:block_quote'>
                 <xsl:choose>
-                        <!-- if block_quote followed by block_quote then this is an epigraph -->
+                        <!-- if block_quote followed by another block_quote then this is an epigraph -->
                         <xsl:when test='*[self::cm:block_quote]'>
                                 <div class='epigraph'>
                                         <blockquote>
@@ -109,11 +117,14 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:otherwise>
                 </xsl:choose>
         </xsl:template>
+        <!-- text nodes -->
         <xsl:template match="cm:text">
                 <xsl:value-of select="text()"/>
         </xsl:template>
+        <!-- links -->
         <xsl:template match="cm:link">
                 <xsl:choose>
+                        <!-- sidenote urls -->
                         <xsl:when test='starts-with(@destination, "sidenote")'>
                                 <xsl:variable name='sidenote-id'>
                                         <xsl:value-of select='generate-id(.)' />
@@ -128,6 +139,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                                         </span>
                                 </xsl:element>
                         </xsl:when>
+                        <!-- margin urls -->
                         <xsl:when test='starts-with(@destination, "margin")'>
                                 <xsl:variable name='sidenote-id'>
                                         <xsl:value-of select='generate-id(.)' />
@@ -142,6 +154,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                                         </span>
                                 </xsl:element>
                         </xsl:when>
+                        <!-- other normal urls -->
                         <xsl:otherwise>
                                 <xsl:element name="a">
                                         <xsl:attribute name="href">
@@ -155,11 +168,13 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:otherwise>
                 </xsl:choose>
         </xsl:template>
+        <!-- code spans (inline) -->
         <xsl:template match='cm:code'>
                 <span class='code'>
                         <xsl:value-of select='text()' />
                 </span>
         </xsl:template>
+        <!-- code blocks -->
         <xsl:template match='cm:code_block'>
                 <pre class='code'>
                         <xsl:element name='code'>
@@ -175,6 +190,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:element>
                 </pre>
         </xsl:template>
+        <!-- lists -->
         <xsl:template match="cm:list">
                 <xsl:choose>
                         <xsl:when test="@type = &quot;ordered&quot;">
@@ -192,14 +208,18 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:when>
                 </xsl:choose>
         </xsl:template>
+        <!-- list items -->
         <xsl:template match="cm:item">
                 <li>
                         <xsl:apply-templates/>
                 </li>
         </xsl:template>
+        <!-- images -->
         <xsl:template match="cm:image">
+                <!-- figure number -->
                 <xsl:variable name="fignumber" select="1+count(./preceding::cm:image)"/>
                 <xsl:choose>
+                        <!-- margin figures -->
                         <xsl:when test='starts-with(@title, "margin")'>
                                 <xsl:variable name='sidenote-id'><xsl:value-of select='generate-id(.)' /></xsl:variable>
                                 <label for='{$sidenote-id}' class='margin-toggle'>⊕</label>
@@ -223,6 +243,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:when>
                         <xsl:otherwise>
                                 <xsl:element name='figure'>
+                                        <!-- full width figures -->
                                         <xsl:if test='starts-with(@title, "fullwidth")'>
                                                 <xsl:attribute name='class'>fullwidth</xsl:attribute>
                                         </xsl:if>
@@ -248,6 +269,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:otherwise>
                 </xsl:choose>
         </xsl:template>
+        <!-- strong and em -->
         <xsl:template match="cm:strong">
                 <strong>
                         <xsl:apply-templates/>
@@ -258,8 +280,10 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         <xsl:apply-templates/>
                 </em>
         </xsl:template>
-
-        <!-- Hack template to generate HTML elements from escaped stuff -->
+        <!-- 
+             Hack template to generate HTML elements from escaped stuff 
+             &gt;/hola> will generate </hola>
+        -->
         <xsl:template name='html-end'>
                 <xsl:param name='text' />
                 <xsl:choose>
@@ -277,6 +301,10 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:otherwise>
                 </xsl:choose>
         </xsl:template>
+        <!-- 
+             template function to generate a start element 
+             &myhtml; will generate <myhtml>
+        -->
         <xsl:template name='html-start'>
                 <xsl:param name='text' />
                 <xsl:choose>
@@ -292,7 +320,7 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         </xsl:otherwise>
                 </xsl:choose>
         </xsl:template>
-
+        <!-- custom HTML entries in markdown are processed here -->
         <xsl:template match="cm:html_block">
                 <xsl:call-template name='html-start'>
                         <xsl:with-param name='text' select='text()' />
