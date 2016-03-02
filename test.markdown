@@ -1,4 +1,4 @@
-# xmark = markdown + Tufte CSS
+# xmark = Markdown + Tufte CSS
 ## Antonio Vieiro
 
 ## A brief introduction
@@ -9,7 +9,7 @@
 
 [tufte-css](https://edwardtufte.github.io/tufte-css/) provides tools to style web articles using the ideas demonstrated by Edward Tufte's books and handouts. It was created by [Dave Liepmann](http://www.daveliepmann.com/) in late 2015 and is now an Edward Tufte project.
 
-[xmark](https://github.com/vieiro/xmark) is a simple XSLT stylesheet that transforms CommonMark compliant plain text documents ([see the source of this one here](https://github.com/vieiro/xmark/blob/master/test.md)), with some additional conventions, into tufte-css styled web pages. 
+[xmark](https://github.com/vieiro/xmark) is a simple XSLT stylesheet that transforms CommonMark compliant plain text documents ([see the source of this one here](https://raw.githubusercontent.com/vieiro/xmark/master/test.markdown)), with some additional conventions, into tufte-css styled web pages. 
 
 This document enumerates the goals of xmark, its conventions and explains how to use it.
 
@@ -35,7 +35,7 @@ Nor Markdown nor CommonMark support document metadata so, for instance, there is
 
 > The document title is the first section of the document with level one. This is, the first paragraph tagged with a single '#' in the markdown document.
 
-It does not matter where you hide the first level one tag in your markdown document: xmark always places the title as the first paragraph of the document, using an ```<h1>``` HTML tag.
+It does not matter where you hide the first level one tag in your markdown document: xmark always places the title as the first paragraph of the document, using an ```<h1>``` HTML tag. The title does not appear in the Table of Contents.
 
 
 ``` markdown
@@ -54,11 +54,11 @@ For instance:
 ## This is the document subtitle
 ```
 
-It does not matter where you specify the subtitle in the source document, xmark always places the subtitle as the second paragraph of the document, using the ```<p class='subtitle'>``` tufte-css element.
+It does not matter where you specify the subtitle in the source document, xmark always places the subtitle as the second paragraph of the document, using the ```<p class='subtitle'>``` tufte-css element. The subtitle does not appear in the Table of Contents.
 
 ### Epigraph convention
 
-CommonMark does not support epigraphs, but allows for nested block quotes. The xmark convention is as follows: 
+CommonMark does not support epigraphs, but allows for nested block quotes. xmark makes use of this feature, making the double-nested block quotes work as epigraphs:
 
 > Two-level nested block quotes (i.e., a pagraph starting with ```>>```) are always transformed to epigraphs. 
 
@@ -87,12 +87,13 @@ That gets translated in the following HTML:
 
 ### Sidenote convention
 
-Nor markdown nor CommonMark support sidenotes. But these are very useful.
+Nor markdown nor CommonMark support sidenotes [Sidenotes are like footnotes, except they don't force the user to scroll the page](sidenote). 
 
-> Sidenotes are normal markdown links what use the text ```sidenote``` as the URL.
+Markdown uses the ```[link text](url)``` structure to define links. xmark abuses this structure with the following convention:
 
-So, to create a sidenote [Sidenotes are like footnotes, except they don't force the user to scroll the page](sidenote) just use the text ```sidenote``` as the url of your link and you are all set. Sidenote numbers are automatically generated, so there's no need to worry about that detail.
+> Sidenotes are normal markdown links that use the word ```sidenote``` as its url.
 
+Sidenote numbers are automatically generated, so there's no need to worry about that detail.
 
 ``` markdown
 This is a normal paragraph with a 
@@ -110,9 +111,9 @@ As in tufte-css, sidenotes (and margin notes, below) are visible in wider screen
 
 ### Margin note convention
 
-Margin notes are just like sidenotes, but do not have footnote-style numbers. The xmark convention for margin notes is as follows:
+Margin notes are just like sidenotes, but do not have footnote-style numbers. The xmark convention for margin notes is similar to the previous convention:
 
-> To create a margin note write a normal markdown link, and write the text ```margin``` as the url.
+> To create a margin note write a normal markdown link, but use the word ```margin``` as the url.
 
 So, for instance, the markdown text:
 
@@ -145,10 +146,9 @@ Sadly nor CommonMark nor Markdown support figures with captions [(there's an ong
 
 To overcome this limitation xmark uses the following convention
 
-> Use the 'alt' text as the caption for the figure and use the 'title' text as both the HTML alt and the title.
+> Use the 'alt' text as the caption for the figure, and abuse the 'title' text as both the HTML alt and the title.
 
 So, for instance, the following text:
-
 
 ``` markdown
 ![From Edward Tufte, *Visual Display of 
@@ -169,9 +169,13 @@ Graphics that are ancillary to the main body of the text are placed in margin fi
 
 But CommonMark and Markdown have just a single construct for images.  ![F.J. Cole, “The History of Albrecht Dürer’s Rhinoceros in Zooological Literature,” *Science, Medicine, and History: Essays on the Evolution of Scientific Thought and Medical Practice (London, 1953)*, ed. E. Ashworth Underwood, 337-356. From page 71 of Edward Tufte’s *Visual Explanations*.](tufte-css/img/rhino.png "margin Rhino image") 
 
-How could xmark support margin figures easily? By abusing the construct, of course. xmark abuses the title part of the image (that appears when you place the mouse over the image for a while), and if the title starts with the word 'margin' then the image is placed in a margin note. This is the 'margin figure xmarkc onvention'
+How could xmark support margin figures easily? By abusing the construct, of course. 
+
+xmark abuses the title part of the image (that appears when you place the mouse over the image for a while), and if the title starts with the word 'margin' then the image is placed in a margin note, and if the title starts with the word 'fullwidth' then the image will be rendered as a full-width figure. The conventions are then:
 
 > If the title of the image starts with the word ```margin``` the figure will be placed in the margin.
+
+> If the title of the image starts with the word ```fullwidth``` the figure will be full-width.
 
 So any image constructed like this:
 
@@ -181,8 +185,7 @@ So any image constructed like this:
 
 (note the ```margin``` word at the beginning of the title) will be considered a margin figure.
 
-To create a full-width figure just use the word ```fullwidth``` instead of ```margin``` as the first word of the image title. So, for instance, the markdown text:
-
+And the following markup:
     
 ```markdown
 ![Edward Tufte’s English translation of the 
@@ -192,9 +195,11 @@ From *Beautiful Evidence*, page
 "fullwidth Napoleon's march").
 ```
 
-Renders as:
+Will be rendered as:
 
 ![Edward Tufte’s English translation of the Napoleon’s March data visualization. From *Beautiful Evidence*, page 122-124.](tufte-css/img/napoleons-march.png "fullwidth Napoleon's march").
+
+Note that the ```margin``` and ```fullwidth``` special words are removed from the resulting HTML figure title. As in Tufte-CSS, full-width images are also numbered automaticcally with xmark.
 
 ### Source code convention
 
@@ -210,7 +215,7 @@ end
 ```
 ````
 
-That is a part of a Ruby program, will be translated to the HTML equivalent:
+That is tagged as a Ruby program, will be translated to the HTML equivalent:
 
 ``` html
 <pre class='code'><code class='language-ruby code'>def foo(x)
@@ -242,7 +247,7 @@ In order to use xmark one needs the following software:
 
 1. A CommonMark processor that generates XML, such as the excellent [John MacFarlane's cmark](https://github.com/jgm/cmark).
 2. The tufte-css project under the 'tufte-css' folder in a working directory of your liking.
-3. The xmark.xsl the xmark stylesheet, [available here](https://github.com/vieiro/xmark/blob/master/xmark.xsl).
+3. The xmark.xsl stylesheet, [available here](https://github.com/vieiro/xmark/blob/master/xmark.xsl).
 4. An XSLT processor, such as [xsltproc](http://www.xmlsoft.org). If you're using Mac OS/X, Linux or FreeBSD you may already have it installed.
 
 If you have cloned [xmark's github repository](https://github.com/vieiro/xmark) you can issue the ```git submodule init``` command to clone CommonMark's cmark and tufte-css projects.
@@ -264,6 +269,16 @@ And, if you want to disable syntax highlighting:
 ### License
 
 xmark is released under the MIT License.
+
+## Further reading
+
+Some links you may find of interest:
+
+* [Tufte CSS homepage](https://edwardtufte.github.io/tufte-css/)
+* [CommonMark homepage](http://commonmark.org)
+* [xmark's project page at github](https://github.com/vieiro/xmark).
+* [The source of this document](https://raw.githubusercontent.com/vieiro/xmark/master/test.markdown)
+* [This document as rendered by GitHub](https://github.com/vieiro/xmark/blob/master/test.markdown)
 
 ## Epilogue
 
