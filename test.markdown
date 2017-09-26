@@ -254,17 +254,17 @@ If you have cloned [xmark's github repository](https://github.com/vieiro/xmark) 
 
 Once everything is set up you process your CommonMark file (```myfile.markdown```) with cmark, and then pipe that to xsltproc to generate an output file ```myfile.html```, like so:
 
-    cmark -t xml myfile.markdown | xsltproc --novalid --nonet xmark.xsl > myfile.html
+    cmark -t xml myfile.markdown | xsltproc --novalid --nonet xmark.xsl - > myfile.html
 
 Or, if you want to disable the Table of Contents:
 
     cmark -t xml myfile.markdown | xsltproc --novalid --nonet \
-       --stringparam generate.toc no xmark.xsl > myfile.html
+       --stringparam generate.toc no xmark.xsl - > myfile.html
 
 And, if you want to disable syntax highlighting:
 
     cmark -t xml myfile.markdown | xsltproc --novalid --nonet \
-       --stringparam highlight no xmark.xsl > myfile.html
+       --stringparam highlight no xmark.xsl - > myfile.html
 
 ### License
 
