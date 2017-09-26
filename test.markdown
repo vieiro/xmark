@@ -252,7 +252,7 @@ In order to use xmark one needs the following software:
 
 If you have cloned [xmark's github repository](https://github.com/vieiro/xmark) you can issue the ```git submodule init``` command to clone CommonMark's cmark and tufte-css projects.
 
-Once everything is set up you process your CommonMark file wiht cmark, and then pipe that to xsltproc, like so:
+Once everything is set up you process your CommonMark file (```myfile.markdown```) with cmark, and then pipe that to xsltproc to generate an output file ```myfile.html```, like so:
 
     cmark -t xml myfile.markdown | xsltproc --novalid --nonet xmark.xsl > myfile.html
 
