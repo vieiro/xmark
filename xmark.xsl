@@ -214,6 +214,13 @@ XSLT Stylesheet to generate tufte-css styled web pages from CommonMark documents
                         <xsl:apply-templates/>
                 </li>
         </xsl:template>
+
+        <!-- softbreaks -->
+        <xsl:template match="cm:softbreak">
+                <xsl:text> 
+</xsl:text>
+        </xsl:template>
+
         <!-- images -->
         <xsl:template match="cm:image">
                 <!-- figure number -->
